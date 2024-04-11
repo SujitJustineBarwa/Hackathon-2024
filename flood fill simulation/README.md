@@ -2,7 +2,7 @@
 
 In this section, a python code is presented where a web app has been designed which simulates the maze and the working of the flood fill algorithm.The dash library is used.
 
-**How to use this section of the code**
+**<u>How to use this section of the code</u>**
 1) Create a new environment
 2) Run pip install -r requirements.txt
 3) Run app.py
