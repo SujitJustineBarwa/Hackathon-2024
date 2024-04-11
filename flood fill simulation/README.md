@@ -1,4 +1,4 @@
-# Simulation for flood fil algorithm
+# Simulation for flood fill algorithm
 
 In this section, a python code is presented where a web app has been designed which simulates the maze and the working of the flood fill algorithm.The dash library is used.
 
@@ -7,7 +7,7 @@ In this section, a python code is presented where a web app has been designed wh
 2) Run pip install -r requirements.txt
 3) Run app.py
 
-**The Architect of the code**
+****The Architect of the code****
 ![alt text](Architecture.PNG)
 
 **Structure of walls.py**
