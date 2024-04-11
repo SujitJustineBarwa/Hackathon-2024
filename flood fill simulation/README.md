@@ -7,7 +7,7 @@ In this section, a python code is presented where a web app has been designed wh
 2) Run pip install -r requirements.txt
 3) Run app.py
 
-****The Architect of the code****
+**The Architect of the code**
 ![alt text](Architecture.PNG)
 
 **Structure of walls.py**
