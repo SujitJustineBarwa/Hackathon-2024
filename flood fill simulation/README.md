@@ -13,10 +13,12 @@ In this section, a python code is presented where a web app has been designed wh
 **Structure of walls.py**
 ![alt text](structure_of_wall.PNG)
 1) Class Node:
+   
     a) This class is for representing a point in space.
+   
     b) A unique id is assigned to every node.
     
-2) Class Node_map:
+3) Class Node_map:
     a) This class generates the unique node points and set the neighbouring points(East,West,North,South).
     b) Two seperate nodes_lists are maintained 
         i) all_internal_nodes
@@ -24,10 +26,10 @@ In this section, a python code is presented where a web app has been designed wh
         Note : The edge nodes are note allow to keep the internal nodes as there children(neighour) while internal nodes can keep edge nodes as there children(neighour).This is done so that in furthur while in the development freedom could be given to the internal nodes
     c) A functionality is provide where you can find the node via its x and y coordinate.
     
-3) Class wall_element:
+4) Class wall_element:
     a) It stores two nodes and also what color it should be when plotted.
 
-4) Class walls:
+5) Class walls:
     a) It create node map and generate all the possible walls.
     b) The functionality then prune_walls() performs the following operation:
         i) Makes the goal walls.
