@@ -15,7 +15,6 @@ In this section, a python code is presented where a web app has been designed wh
 1) Class Node:
    
     a) This class is for representing a point in space.
-   
     b) A unique id is assigned to every node.
     
 3) Class Node_map:
