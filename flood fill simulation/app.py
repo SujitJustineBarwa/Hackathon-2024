@@ -1,58 +1,151 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+import dash_mantine_components as dmc
 import plotly.graph_objects as go
 from walls import walls
 from extended_functions import *
+import os
 
-app = dash.Dash(__name__)
-
-# Sample data for the grid
+app = dash.Dash(__name__, external_stylesheets=['styles.css'])
 wall_pattern = walls()
-state_reg = state_register()
-state_reg.add("regenerate",0)
-state_reg.add("maze",[])
+disk = memory()
 
 app.layout = html.Div(children=[
-    dcc.Graph(
-        id='grid-graph'
-    ),
-    html.Button('Regenerate', id='regenerate_button',n_clicks=0)
-    
-])
+    html.Div([
+        html.H1("Maze Builder", style={'textAlign': 'center', 'marginBottom': '20px'}),
+        html.P("Welcome to the Maze Builder app. Use the buttons and dropdowns below to interact with the maze.", 
+               style={'textAlign': 'center', 'marginBottom': '40px'}),
+        html.Div(
+            dcc.Graph(
+                id='grid-graph',
+                style={'margin': 'auto'}  # Center align the graph
+            ),
+            style={'textAlign': 'center', 'marginBottom': '40px'}
+        ),
+        html.Div([
+            html.Div(id='selected_node_monitor'),
+            dmc.Button('Delete Wall', id='delete_wall_button', color='black', style={'marginRight': '10px'}),
+        ], style={'textAlign': 'center', 'marginBottom': '40px'}),
+        dmc.Button('Regenerate', id='regenerate_button', color='black', variant='filled', style={'marginBottom': '40px'}),
+        html.Div([
+            dcc.Input(id='save_filename', type='text', placeholder='Enter filename', style={'marginRight': '10px'}),
+            dmc.Button('Save Maze', id='save_button', color='blue', variant='filled', style={'marginRight': '10px'}),
+        ], style={'textAlign': 'center', 'marginBottom': '40px'}),
+        html.Div([
+            dcc.Dropdown(id='load_dropdown', options=[], placeholder='Select file to load', style={'marginRight': '10px'}),
+            dmc.Button('Load Maze', id='load_button', color='blue', variant='filled', style={'marginRight': '10px'}),
+        ], style={'textAlign': 'center', 'marginBottom': '40px'}),
+        html.Div([
+            dcc.Dropdown(id='delete_dropdown', options=[], placeholder='Select file to delete', style={'marginRight': '10px'}),
+            dmc.Button('Delete Maze', id='delete_button', color='red', variant='filled', style={'marginRight': '10px'}),
+        ], style={'textAlign': 'center', 'marginBottom': '40px'}),
+    ], style={'maxWidth': '800px', 'margin': 'auto'}),
+], style={'padding': '20px'})
 
 @app.callback(
-    Output('grid-graph', 'figure'),
-    [Input('grid-graph', 'figure'),
-     Input("grid-graph", "clickData"),
-     Input("regenerate_button", "n_clicks")]# Empty dependency for initial render
+    [Output('grid-graph', 'figure'),
+     Output('load_dropdown', 'options'),
+     Output('delete_dropdown', 'options'),
+     Output('selected_node_monitor', 'children'),
+     Output('delete_wall_button', 'color')],
+    [Input('grid-graph', 'clickData'),
+     Input('regenerate_button', 'n_clicks'),
+     Input('save_button', 'n_clicks'),
+     Input('load_button', 'n_clicks'),
+     Input('delete_button', 'n_clicks'),
+     Input('delete_wall_button', 'n_clicks')],
+    [State('grid-graph', 'figure'),
+     State('save_filename', 'value'),
+     State('load_dropdown', 'value'),
+     State('delete_dropdown', 'value')]
 )
-def update_graph(fig,clickData,regenerate):
-    state_reg.update_curr("regenerate",regenerate)
-    state_reg.show()
-     
-    # Wall Generation
-    fig = go.Figure()
-    if state_reg.curr_state["regenerate"] != state_reg.prev_state["regenerate"]:
+def update_graph(clickData, regenerate_clicks, save_clicks, load_clicks, delete_clicks, delete_wall_clicks,
+                 fig, save_filename, load_filename, delete_filename):
+    ctx = dash.callback_context
+    button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    updated_fig = figure_template()
+
+    load_options = []
+    delete_options = []
+
+    filenames = [filename for filename in os.listdir() if filename.endswith('.txt')]
+    load_options = [{'label': filename, 'value': filename} for filename in filenames]
+    delete_options = [{'label': filename, 'value': filename} for filename in filenames]
+
+    if button_id == 'regenerate_button':
+        # Wall Generation
         for wall in wall_pattern.prune_walls():
-            fig.add_trace(wall)
-    
-    # Updating the looks of the Maze
-    fig.update_layout(
-        height = 750,
-        width = 750,
-        margin=dict(l=0, r=0, t=0, b=0),
-        paper_bgcolor="darkgrey",
-        plot_bgcolor = "black",
-        showlegend=False
-        )
+            updated_fig.add_trace(wall.element())
+
+    elif button_id == 'save_button':
+        # Save maze to a file
+        if fig and save_filename:
+            filename = save_filename + '.txt'
+            wall_pattern.to_text(filename)\
+
+    elif button_id == 'load_button':
+        # Load maze from file
+        if load_clicks > 0:
+            for wall in wall_pattern.from_text(load_filename):
+                updated_fig.add_trace(wall.element())
+
+    elif button_id == 'delete_button':
+        # Delete maze file
+        if delete_clicks > 0:
+            if os.path.exists(delete_filename):
+                os.remove(delete_filename)
+
+    disk.add("delete_wall_enable",False)
+    disk.add("selected_nodes",[])
+    disk.add("clicked_nodes",[])
+    disk.add("delete_wall_button_color",'')
+    if clickData and disk.status["delete_wall_enable"]:
+        node_x, node_y = clickData['points'][0]['x'], clickData['points'][0]['y']
+        node = wall_pattern.find_Node(node_x, node_y)
+        disk.status["selected_nodes"].append(f"Selected Node ID: {node.node_Id}")
+        disk.status["clicked_nodes"].append(node)
+        print(disk.status["clicked_nodes"])
         
-    fig.update_xaxes(visible=False,showgrid=False)
-    fig.update_yaxes(visible=False,showgrid=False)
-         
-    state_reg.update_prev("regenerate",regenerate)   
+        if len(disk.status["clicked_nodes"]) == 2:
+            wall_pattern.delete_wall(*disk.status["clicked_nodes"])
+            
+            # Resetting the disk memory and delete wall button color
+            disk.status["selected_nodes"] = []
+            disk.status["clicked_nodes"] = []
+            disk.status["delete_wall_enable"] = False
+            disk.status["delete_wall_button_color"] = ''
+
+    # Setting the disk memory and delete wall button color
+    if button_id == 'delete_wall_button':
+        if not disk.status["delete_wall_enable"]:
+            disk.status["delete_wall_enable"] = True
+            disk.status["delete_wall_button_color"] = 'red'
+
+    # Replotting the walls
+    if wall_pattern.wall_list:
+        for wall in wall_pattern.wall_list:                  
+                updated_fig.add_trace(wall.element())
+                
+    return updated_fig, load_options, delete_options, disk.status["selected_nodes"],disk.status["delete_wall_button_color"]
+
+def figure_template():
+    updated_fig = go.Figure()
     
-    return fig
+    updated_fig.update_layout(
+                        height=750,
+                        width=850,
+                        margin=dict(l=0, r=0, t=0, b=0),
+                        paper_bgcolor="darkgrey",
+                        plot_bgcolor="black",
+                        showlegend=False
+                    )
+
+    updated_fig.update_xaxes(visible=False, showgrid=False)
+    updated_fig.update_yaxes(visible=False, showgrid=False)
+    return  updated_fig
+
 if __name__ == '__main__':
     app.run_server(debug=True)

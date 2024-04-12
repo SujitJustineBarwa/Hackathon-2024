@@ -1,0 +1,66 @@
+/* Add CSS styling for professional appearance */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    color: #333;
+}
+
+p {
+    color: #666;
+}
+
+#grid-graph {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#selected_node_monitor {
+    margin-bottom: 10px;
+}
+
+input[type="text"], select {
+    width: 200px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button.black {
+    background-color: #333;
+    color: #fff;
+}
+
+button.black:hover {
+    background-color: #555;
+}
+
+button.blue {
+    background-color: #007bff;
+    color: #fff;
+}
+
+button.blue:hover {
+    background-color: #0056b3;
+}
+
+button.red {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+button.red:hover {
+    background-color: #c82333;
+}

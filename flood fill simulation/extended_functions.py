@@ -1,19 +1,14 @@
-class state_register:
+class memory:
     def __init__(self):
-        self.curr_state = {}
-        self.prev_state = {}
+        self.status = {}
         
-    def add(self,name,value):
-        self.curr_state[name] = value
-        self.prev_state[name] = value
+    def add(self,name,type):
+        if name not in self.status.keys():
+            self.status[name] = type
         
-    def update_prev(self,name,value):
-        self.prev_state[name] = value
+    def update(self,name,info):
+        self.status[name] = info
         
-    def update_curr(self,name,value):
-        self.curr_state[name] = value
-        
-    def show(self):
-        print(self.curr_state)
-        print(self.prev_state)
-        print()
+    def reset(self):
+        for key,value in self.status.items():
+            self[key] = False if type(value) is bool else [] 

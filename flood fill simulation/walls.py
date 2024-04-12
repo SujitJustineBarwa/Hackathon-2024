@@ -91,25 +91,32 @@ class wall_element:
    
 # Create walls
 # Functionality :
-#   1) Creates all the possible walls 
+#   1) Generates all the possible walls 
 #   2) Prune some walls randomly
 class walls(Node_map):
     def __init__(self):
         super().__init__()
         self.all_walls = defaultdict(list)
-        self.generate_all_walls()
-        
-    def find_wall(self,node1,node2):
+        self.generate_all_walls()    # Generate wall but walls won't be visible
+        self.wall_list = []
+       
+    def find_wall_with_nodes(self,node1,node2):
         for node,walls in self.all_walls.items():
             for wall in walls:
                 if node1 in wall.nodes and node2 in wall.nodes:
                     return wall
         
+    def find_wall_with_id(self,id):
+        for node,walls in self.all_walls.items():
+            for wall in walls:
+                if wall.wall_id == id:
+                    return wall
+                    
     def generate_all_walls(self):
         for node in self.all_internal_nodes:
             if len(node.children) == 4:
                 for child in node.children:
-                    temp_wall = self.find_wall(node,child)
+                    temp_wall = self.find_wall_with_nodes(node,child)
                     if temp_wall:
                         self.all_walls[node].append(temp_wall)
                     else:
@@ -118,7 +125,7 @@ class walls(Node_map):
         for node in self.all_edge_nodes:
             if len(node.children):
                 for child in node.children:
-                    temp_wall = self.find_wall(node,child)
+                    temp_wall = self.find_wall_with_nodes(node,child)
                     if temp_wall:
                         self.all_walls[node].append(temp_wall)
                     else:
@@ -137,62 +144,66 @@ class walls(Node_map):
                     wall.children.append(wall_2)
             
         
-    def prune_walls(self,load_prune_walls = None):
+    def create_goal_walls(self):
+        # Build the goal
+        self.exceptions =  [self.find_Node(GRID_SIZE//2,GRID_SIZE//2),
+                            self.find_Node(GRID_SIZE//2+1,GRID_SIZE//2),
+                            self.find_Node(GRID_SIZE//2+1,GRID_SIZE//2+1),
+                            self.find_Node(GRID_SIZE//2,GRID_SIZE//2+1),
+                            self.find_Node(GRID_SIZE//2-1,GRID_SIZE//2+1),
+                            self.find_Node(GRID_SIZE//2-1,GRID_SIZE//2),
+                            self.find_Node(GRID_SIZE//2-1,GRID_SIZE//2-1),
+                            self.find_Node(GRID_SIZE//2,GRID_SIZE//2-1)]
         
-        if not load_prune_walls:
+        self.wall_list =   [self.all_walls[self.exceptions[1]][3],
+                            self.all_walls[self.exceptions[2]][3],
+                            self.all_walls[self.exceptions[3]][2],
+                            self.all_walls[self.exceptions[4]][3],
+                            self.all_walls[self.exceptions[5]][3],
+                            self.all_walls[self.exceptions[6]][0],
+                            self.all_walls[self.exceptions[7]][0],
+                            ]
+                            
+        self.goal_walls =  self.wall_list.copy()
+        
+        for wall in self.wall_list:
+            wall.line_color = "green"
+           
+    def create_outer_walls(self): 
+        # Building the edge walls
+        wall_built = []
+        for node in self.all_edge_nodes:
+            for wall in self.all_walls[node]:
+                if wall not in wall_built:
+                    self.wall_list.append(wall)
+        
+    def prune_walls(self,remove_cycles = False):
+        
+        self.wall_list = []
+        self.create_goal_walls()     # Creates wall and added them in wall list that is visible
+        self.create_outer_walls()    # Creates wall and added them in wall list that is visible
+        
+        # Building the internal walls
+        wall_built = [None]
+        select_wall = None
+        for node in self.all_internal_nodes:
+            if node not in self.exceptions:
+                while select_wall in wall_built:
+                    select_wall = random.choice(self.all_walls[node])
+                self.wall_list.append(select_wall)
+                wall_built.append(select_wall)
             
-            # Build the goal
-            exceptions =  [self.find_Node(GRID_SIZE//2,GRID_SIZE//2),
-                           self.find_Node(GRID_SIZE//2+1,GRID_SIZE//2),
-                           self.find_Node(GRID_SIZE//2+1,GRID_SIZE//2+1),
-                           self.find_Node(GRID_SIZE//2,GRID_SIZE//2+1),
-                           self.find_Node(GRID_SIZE//2-1,GRID_SIZE//2+1),
-                           self.find_Node(GRID_SIZE//2-1,GRID_SIZE//2),
-                           self.find_Node(GRID_SIZE//2-1,GRID_SIZE//2-1),
-                           self.find_Node(GRID_SIZE//2,GRID_SIZE//2-1)]
-            
-            self.wall_list = [self.all_walls[exceptions[1]][3],
-                             self.all_walls[exceptions[2]][3],
-                             self.all_walls[exceptions[3]][2],
-                             self.all_walls[exceptions[4]][3],
-                             self.all_walls[exceptions[5]][3],
-                             self.all_walls[exceptions[6]][0],
-                             self.all_walls[exceptions[7]][0],
-                             #self.all_walls[exceptions[2]][2]
-                             ]
-            
-            goal_walls =  self.wall_list.copy()
-            
-            for wall in self.wall_list:
-                wall.line_color = "green"
-            
-            # Building the internal walls
-            wall_built = [None]
-            select_wall = None
-            for node in self.all_internal_nodes:
-                if node not in exceptions:
-                    while select_wall in wall_built:
-                        select_wall = random.choice(self.all_walls[node])
-                    self.wall_list.append(select_wall)
-                    wall_built.append(select_wall)
-               
+        if remove_cycles:
             # Remove the cyclic components
             self.set_children() # Resets the children
             for wall in self.wall_list:
                 wall_to_remove = self.cyclic_check(wall)
                 if wall_to_remove:
-                    if wall_to_remove not in goal_walls:
+                    if wall_to_remove not in self.goal_walls:
                         self.wall_list.remove(wall_to_remove)
                         self.set_children()
-                    
-            # Building the edge walls
-            wall_built = []
-            for node in self.all_edge_nodes:
-                for wall in self.all_walls[node]:
-                    if wall not in wall_built:
-                        self.wall_list.append(wall)
-                
-            return list(map(lambda x : x.element(),self.wall_list))
+                        
+        return self.wall_list
         
     def cyclic_check(self,wall):
         
@@ -209,6 +220,31 @@ class walls(Node_map):
                     return child     # This child is causing cyclic nature
                     
         return False
+        
+    def to_text(self,name):
+        with open(name, 'w+') as file:
+            # Registering the all wall ID
+            for wall in self.wall_list:
+                file.write(wall.wall_id + "\n")
+            file.close()
+            
+    def from_text(self,name):
+        self.wall_list = []
+        self.create_goal_walls()
+        self.create_outer_walls()
+                        
+        with open(name, 'r') as file:
+            # Registering the all wall ID
+            wall_id_list = file.readlines()
+            for wall_id in wall_id_list:
+                self.wall_list.append(self.find_wall_with_id(wall_id[:-1]))    # -1 removes the \n char that was added in to_text()
+            file.close()
+            
+        return self.wall_list
+        
+    def delete_wall(self,node1,node2):
+        wall = self.find_wall_with_nodes(node1,node2)
+        self.wall_list.remove(wall)
             
       
 #a = Node_map()
