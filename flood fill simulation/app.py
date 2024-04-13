@@ -10,6 +10,7 @@ from extended_functions import *
 import dash_mantine_components as dmc
 
 app = dash.Dash(__name__, external_stylesheets=[])
+server = app.server
 wall_pattern = walls()
 disk = memory()
 mat = matrix()
