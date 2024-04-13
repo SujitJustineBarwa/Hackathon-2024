@@ -18,6 +18,7 @@ app.layout = html.Div(children=[
     html.Div([
         html.H1("Maze Builder", style={'textAlign': 'center', 'marginBottom': '20px'}),
         html.P("Welcome to the Maze Builder app. Use the buttons and dropdowns below to interact with the maze.",
+        html.P("Welcome to the Maze Builder app. Use the buttons and dropdowns below to interact with the maze.",
                style={'textAlign': 'center', 'marginBottom': '40px'}),
         html.Div(
             dcc.Graph(
@@ -38,14 +39,24 @@ app.layout = html.Div(children=[
             dcc.Input(id='save_filename', type='text', placeholder='Enter filename', style={'marginRight': '10px'}),
             dmc.Button('Save Maze', id='save_button', color='blue', variant='filled',
                        style={'marginRight': '10px'}),
+            dmc.Button('Save Maze', id='save_button', color='blue', variant='filled',
+                       style={'marginRight': '10px'}),
         ], style={'textAlign': 'center', 'marginBottom': '40px'}),
         html.Div([
             dcc.Dropdown(id='load_dropdown', options=[], placeholder='Select file to load',
                          style={'marginRight': '10px'}),
             dmc.Button('Load Maze', id='load_button', color='blue', variant='filled',
                        style={'marginRight': '10px'}),
+            dcc.Dropdown(id='load_dropdown', options=[], placeholder='Select file to load',
+                         style={'marginRight': '10px'}),
+            dmc.Button('Load Maze', id='load_button', color='blue', variant='filled',
+                       style={'marginRight': '10px'}),
         ], style={'textAlign': 'center', 'marginBottom': '40px'}),
         html.Div([
+            dcc.Dropdown(id='delete_dropdown', options=[], placeholder='Select file to delete',
+                         style={'marginRight': '10px'}),
+            dmc.Button('Delete Maze', id='delete_button', color='red', variant='filled',
+                       style={'marginRight': '10px'}),
             dcc.Dropdown(id='delete_dropdown', options=[], placeholder='Select file to delete',
                          style={'marginRight': '10px'}),
             dmc.Button('Delete Maze', id='delete_button', color='red', variant='filled',
@@ -60,6 +71,9 @@ app.layout = html.Div(children=[
      Output('load_dropdown', 'options'),
      Output('delete_dropdown', 'options'),
      Output('selected_node_monitor', 'children'),
+     Output('delete_wall_button', 'color'),
+     Output('alert-delete-wall', 'children'),
+     Output('alert-delete-wall', 'hide')],
      Output('delete_wall_button', 'color'),
      Output('alert-delete-wall', 'children'),
      Output('alert-delete-wall', 'hide')],
@@ -99,6 +113,7 @@ def update_graph(clickData, regenerate_clicks, save_clicks, load_clicks, delete_
         # Save maze to a file
         if fig and save_filename:
             filename = save_filename + '.txt'
+            wall_pattern.to_text(filename)
             wall_pattern.to_text(filename)
 
     elif button_id == 'load_button':
@@ -153,6 +168,15 @@ def update_graph(clickData, regenerate_clicks, save_clicks, load_clicks, delete_
                 disk.status["alert_message"] = "Wall not deleted !!!"
             disk.status["hide"] = False
 
+
+        if len(disk.status["clicked_nodes"]) >= 2:
+            return_status = wall_pattern.delete_wall(*disk.status["clicked_nodes"])
+            if return_status:
+                disk.status["alert_message"] = "Wall deleted !!!"
+            else:
+                disk.status["alert_message"] = "Wall not deleted !!!"
+            disk.status["hide"] = False
+
             # Resetting the disk memory and delete wall button color
             disk.status["selected_nodes"] = []
             disk.status["clicked_nodes"] = []
@@ -181,9 +205,18 @@ def figure_template():
         plot_bgcolor="black",
         showlegend=False
     )
+        height=750,
+        width=850,
+        margin=dict(l=0, r=0, t=0, b=0),
+        paper_bgcolor="darkgrey",
+        plot_bgcolor="black",
+        showlegend=False
+    )
 
     updated_fig.update_xaxes(visible=False, showgrid=False)
     updated_fig.update_yaxes(visible=False, showgrid=False)
+    return updated_fig
+
     return updated_fig
 
 
