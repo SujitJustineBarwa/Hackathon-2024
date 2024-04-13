@@ -244,7 +244,11 @@ class walls(Node_map):
         
     def delete_wall(self,node1,node2):
         wall = self.find_wall_with_nodes(node1,node2)
-        self.wall_list.remove(wall)
+        if wall:
+            self.wall_list.remove(wall)
+            return True   # Return status
+        else:
+            return False    # Return status
             
       
 #a = Node_map()
