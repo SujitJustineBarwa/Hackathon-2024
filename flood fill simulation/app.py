@@ -2,16 +2,17 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-import plotly.express as px
+import plotly.graph_objects as go
+from matrix import matrix
 import os
 from walls import walls
 from extended_functions import *
-import dash_bootstrap_components as dbc
 import dash_mantine_components as dmc
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__, external_stylesheets=[])
 wall_pattern = walls()
 disk = memory()
+mat = matrix()
 
 app.layout = html.Div(children=[
     html.Div([
@@ -28,10 +29,11 @@ app.layout = html.Div(children=[
         html.Div([
             html.Div(id='selected_node_monitor'),
             dmc.Button('Delete Wall', id='delete_wall_button', color='black', style={'marginRight': '10px'}),
+            dmc.Button('Regenerate', id='regenerate_button', color='black', variant='filled',
+                       style={'marginBottom': '40px', 'marginLeft': '10px', 'marginRight': '10px'}),
+            dmc.Button('Reset Matrix', id='reset_matrix_button', color='black', style={'marginRight': '10px'}),
             dmc.Alert(id='alert-delete-wall', hide=True,duration=1000),
         ], style={'textAlign': 'center', 'marginBottom': '40px'}),
-        dmc.Button('Regenerate', id='regenerate_button', color='black', variant='filled',
-                   style={'marginBottom': '40px'}),
         html.Div([
             dcc.Input(id='save_filename', type='text', placeholder='Enter filename', style={'marginRight': '10px'}),
             dmc.Button('Save Maze', id='save_button', color='blue', variant='filled',
@@ -66,18 +68,20 @@ app.layout = html.Div(children=[
      Input('save_button', 'n_clicks'),
      Input('load_button', 'n_clicks'),
      Input('delete_button', 'n_clicks'),
-     Input('delete_wall_button', 'n_clicks')],
+     Input('delete_wall_button', 'n_clicks'),
+     Input('reset_matrix_button', 'n_clicks')],
     [State('grid-graph', 'figure'),
      State('save_filename', 'value'),
      State('load_dropdown', 'value'),
      State('delete_dropdown', 'value')]
 )
 def update_graph(clickData, regenerate_clicks, save_clicks, load_clicks, delete_clicks, delete_wall_clicks,
-                 fig, save_filename, load_filename, delete_filename):
+                 reset_clicks, fig, save_filename, load_filename, delete_filename):
     ctx = dash.callback_context
     button_id = ctx.triggered[0]['prop_id'].split('.')[0]
 
-    updated_fig = figure_template()
+    updated_fig = figure_template()  
+
 
     load_options = []
     delete_options = []
@@ -108,6 +112,10 @@ def update_graph(clickData, regenerate_clicks, save_clicks, load_clicks, delete_
         if delete_clicks > 0:
             if os.path.exists(delete_filename):
                 os.remove(delete_filename)
+
+    elif button_id == 'reset_matrix_button':
+        # Reset matrix
+        mat.reset()
 
     # Setting the disk memory and delete wall button color
     disk.add("delete_wall_enable", False)
@@ -149,16 +157,22 @@ def update_graph(clickData, regenerate_clicks, save_clicks, load_clicks, delete_
             disk.status["selected_nodes"] = []
             disk.status["clicked_nodes"] = []
 
+    # Displaying the matrix
+    updated_fig.add_trace(mat.graph())
+    
     # Replotting the walls
     if wall_pattern.wall_list:
         for wall in wall_pattern.wall_list:
             updated_fig.add_trace(wall.element())
+            
 
     return updated_fig, load_options, delete_options, disk.status["selected_nodes"], disk.status["delete_wall_button_color"], disk.status["alert_message"], disk.status["hide"]
 
 
 def figure_template():
-    updated_fig = px.scatter()
+
+    updated_fig = go.Figure()
+        
     updated_fig.update_layout(
         height=750,
         width=850,
