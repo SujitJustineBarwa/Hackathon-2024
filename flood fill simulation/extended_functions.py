@@ -8,7 +8,7 @@ class memory:
         
     def update(self,name,info):
         self.status[name] = info
-        
+
     def reset(self):
         for key,value in self.status.items():
             self[key] = False if type(value) is bool else [] 

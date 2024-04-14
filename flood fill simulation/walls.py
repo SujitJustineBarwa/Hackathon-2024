@@ -1,8 +1,10 @@
 import plotly.graph_objects as go
 from collections import defaultdict
+import json
 import random
-
-GRID_SIZE = 16
+ 
+with open("config.json", 'r') as file:
+    config = json.load(file)
  
 class Node:
     def __init__(self, x=0, y=0):
@@ -12,7 +14,11 @@ class Node:
         self.children = []
         
     def edge_Node(self):
-        return self.x == 0 or self.y == 0 or self.x == GRID_SIZE or self.y == GRID_SIZE
+        return self.x == 0 or self.y == 0 or self.x == config['GRID_SIZE_X'] or self.y == config['GRID_SIZE_Y']
+        
+    def element(self):
+        #return go.Scatter(x=[self.x], y=[self.y], marker_symbol='circle-open-dot', marker_size=12, marker_color='green')
+        return go.Scatter(x=[self.x], y=[self.y], marker_symbol='circle-open-dot', marker_size=12)
    
 # Create an instance with node points recursively connecting all the neigbour
 # Functionality :
@@ -28,8 +34,8 @@ class Node_map:
         self.set_neighbours()
         
     def generate_Nodes(self):
-        for i in range(GRID_SIZE+1):
-            for j in range(GRID_SIZE+1):
+        for i in range(config['GRID_SIZE_X']+1):
+            for j in range(config['GRID_SIZE_Y']+1):
                 if not self.find_Node(i,j):
                     node = Node(i,j)
                     if not node.edge_Node():
@@ -71,12 +77,13 @@ class Node_map:
 # Functionality :
 #   1) Creates a wall in plotly go
 class wall_element:
-    def __init__(self,node1,node2,line_color = 'green'):
+    def __init__(self,node1,node2,line_color = 'green',opacity = 0.3):
         self.wall_id = node1.node_Id + '_' + node2.node_Id
         self.nodes = [node1,node2]
         self.x = (node1.x,node2.x)
         self.y = (node1.y,node2.y)
         self.line_color = line_color
+        self.opacity = opacity
         self.children = []
         
     def element(self):
@@ -84,10 +91,11 @@ class wall_element:
                             x = self.x,
                             y = self.y,
                             line_color = self.line_color,
+                            opacity=self.opacity
                          )
-    
+        
     def edge_Wall(self):
-        return self.x == (0,0) or self.x == (GRID_SIZE,GRID_SIZE) or self.y == (0,0) or self.y == (GRID_SIZE,GRID_SIZE)
+        return self.x == (0,0) or self.x == (config['GRID_SIZE_X'],config['GRID_SIZE_X']) or self.y == (0,0) or self.y == (config['GRID_SIZE_Y'],config['GRID_SIZE_Y'])
    
 # Create walls
 # Functionality :
@@ -100,12 +108,26 @@ class walls(Node_map):
         self.generate_all_walls()    # Generate wall but walls won't be visible
         self.wall_list = []
        
+    def reset_opacity(self):
+        for node,walls in self.all_walls.items():
+            for wall in walls:
+                wall.opacity = 0.3
+        
     def find_wall_with_nodes(self,node1,node2):
         for node,walls in self.all_walls.items():
             for wall in walls:
                 if node1 in wall.nodes and node2 in wall.nodes:
                     return wall
-        
+                    
+    def find_wall_with_coordinates_in_wall_list(self,x1,y1,x2,y2):
+        node1 = self.find_Node(x1,y1)
+        node2 = self.find_Node(x2,y2)
+        for node,walls in self.all_walls.items():
+            for wall in walls:
+                if node1 in wall.nodes and node2 in wall.nodes:
+                    if wall in self.wall_list:
+                        return wall
+                    
     def find_wall_with_id(self,id):
         for node,walls in self.all_walls.items():
             for wall in walls:
@@ -113,6 +135,7 @@ class walls(Node_map):
                     return wall
                     
     def generate_all_walls(self):
+                            
         for node in self.all_internal_nodes:
             if len(node.children) == 4:
                 for child in node.children:
@@ -130,6 +153,46 @@ class walls(Node_map):
                         self.all_walls[node].append(temp_wall)
                     else:
                         self.all_walls[node].append(wall_element(node,child,line_color = 'white'))
+                        
+        if config['GRID_SIZE_X']%2 == 0 and config['GRID_SIZE_Y']%2 == 0:
+            # Build the goal
+            self.exceptions =  [self.find_Node(config['GRID_SIZE_X']//2,config['GRID_SIZE_Y']//2),
+                                self.find_Node(config['GRID_SIZE_X']//2+1,config['GRID_SIZE_Y']//2),
+                                self.find_Node(config['GRID_SIZE_X']//2+1,config['GRID_SIZE_Y']//2+1),
+                                self.find_Node(config['GRID_SIZE_X']//2,config['GRID_SIZE_Y']//2+1),
+                                self.find_Node(config['GRID_SIZE_X']//2-1,config['GRID_SIZE_Y']//2+1),
+                                self.find_Node(config['GRID_SIZE_X']//2-1,config['GRID_SIZE_Y']//2),
+                                self.find_Node(config['GRID_SIZE_X']//2-1,config['GRID_SIZE_Y']//2-1),
+                                self.find_Node(config['GRID_SIZE_X']//2,config['GRID_SIZE_Y']//2-1)]
+                                
+            self.goal_walls = [self.all_walls[self.exceptions[1]][3],
+                               self.all_walls[self.exceptions[2]][3],
+                               self.all_walls[self.exceptions[3]][2],
+                               self.all_walls[self.exceptions[4]][3],
+                               self.all_walls[self.exceptions[5]][3],
+                               self.all_walls[self.exceptions[6]][0],
+                               self.all_walls[self.exceptions[7]][0],
+                               self.all_walls[self.exceptions[2]][2]]
+                            
+            for wall in self.goal_walls:
+                wall.line_color = "green"
+                
+        else:
+        
+            # Build the goal
+            self.exceptions =  [self.find_Node(config['GRID_SIZE_X']//2,config['GRID_SIZE_Y']//2),
+                                self.find_Node(config['GRID_SIZE_X']//2+1,config['GRID_SIZE_Y']//2),
+                                self.find_Node(config['GRID_SIZE_X']//2+1,config['GRID_SIZE_Y']//2+1),
+                                self.find_Node(config['GRID_SIZE_X']//2,config['GRID_SIZE_Y']//2+1)]
+                                
+            self.goal_walls = [self.all_walls[self.exceptions[1]][1],
+                          self.all_walls[self.exceptions[2]][2],
+                          self.all_walls[self.exceptions[3]][3],
+                          self.all_walls[self.exceptions[0]][0]]
+                            
+            for wall in self.goal_walls:
+                wall.line_color = "green"
+            
     
     def set_children(self):
         for wall in self.wall_list:
@@ -145,29 +208,12 @@ class walls(Node_map):
             
         
     def create_goal_walls(self):
-        # Build the goal
-        self.exceptions =  [self.find_Node(GRID_SIZE//2,GRID_SIZE//2),
-                            self.find_Node(GRID_SIZE//2+1,GRID_SIZE//2),
-                            self.find_Node(GRID_SIZE//2+1,GRID_SIZE//2+1),
-                            self.find_Node(GRID_SIZE//2,GRID_SIZE//2+1),
-                            self.find_Node(GRID_SIZE//2-1,GRID_SIZE//2+1),
-                            self.find_Node(GRID_SIZE//2-1,GRID_SIZE//2),
-                            self.find_Node(GRID_SIZE//2-1,GRID_SIZE//2-1),
-                            self.find_Node(GRID_SIZE//2,GRID_SIZE//2-1)]
         
-        self.wall_list =   [self.all_walls[self.exceptions[1]][3],
-                            self.all_walls[self.exceptions[2]][3],
-                            self.all_walls[self.exceptions[3]][2],
-                            self.all_walls[self.exceptions[4]][3],
-                            self.all_walls[self.exceptions[5]][3],
-                            self.all_walls[self.exceptions[6]][0],
-                            self.all_walls[self.exceptions[7]][0],
-                            ]
+        if config['GRID_SIZE_X']%2 == 0 and config['GRID_SIZE_Y']%2 == 0:
+            self.wall_list =   self.goal_walls[:-1]   
+        else:
+            self.wall_list =   self.goal_walls[:-1]
                             
-        self.goal_walls =  self.wall_list.copy()
-        
-        for wall in self.wall_list:
-            wall.line_color = "green"
            
     def create_outer_walls(self): 
         # Building the edge walls
@@ -177,8 +223,12 @@ class walls(Node_map):
                 if wall not in wall_built:
                     self.wall_list.append(wall)
         
-    def prune_walls(self,remove_cycles = False):
+    def prune_walls(self):
         
+        with open("config.json", 'r') as file:
+            global config
+            config = json.load(file)
+    
         self.wall_list = []
         self.create_goal_walls()     # Creates wall and added them in wall list that is visible
         self.create_outer_walls()    # Creates wall and added them in wall list that is visible
@@ -192,16 +242,7 @@ class walls(Node_map):
                     select_wall = random.choice(self.all_walls[node])
                 self.wall_list.append(select_wall)
                 wall_built.append(select_wall)
-            
-        if remove_cycles:
-            # Remove the cyclic components
-            self.set_children() # Resets the children
-            for wall in self.wall_list:
-                wall_to_remove = self.cyclic_check(wall)
-                if wall_to_remove:
-                    if wall_to_remove not in self.goal_walls:
-                        self.wall_list.remove(wall_to_remove)
-                        self.set_children()
+
                         
         return self.wall_list
         
@@ -230,8 +271,8 @@ class walls(Node_map):
             
     def from_text(self,name):
         self.wall_list = []
-        self.create_goal_walls()
-        self.create_outer_walls()
+        #self.create_goal_walls()
+        #self.create_outer_walls()
                         
         with open(name, 'r') as file:
             # Registering the all wall ID
@@ -250,6 +291,14 @@ class walls(Node_map):
         else:
             return False    # Return status
             
+    def add_wall(self,node1,node2):
+        wall = self.find_wall_with_nodes(node1,node2)
+        if wall:
+            if wall not in self.wall_list:
+                self.wall_list.append(wall)
+                return True   # Return status
+        else:
+            return False    # Return status
       
 #a = Node_map()
 
