@@ -29,11 +29,11 @@ app.layout = html.Div(children=[
                         style={'textAlign': 'center', 'marginBottom': '20px', 'fontSize': '16px','width': '250px'}),
                 html.P("Click on the Step button multiple times to let the mouse move and simultaneously update the matrix. Click on the Reset button to restart the simulation.",
                         style={'textAlign': 'center', 'marginBottom': '20px', 'fontSize': '16px','width': '250px'}),
-                 html.P("Save mazes by giving them names and clicking the Save button. They can then be loaded or deleted by selecting them from the dropdown menus and clicking the respective buttons.",
+                html.P("Save mazes by giving them names and clicking the Save button. They can then be loaded or deleted by selecting them from the dropdown menus and clicking the respective buttons.",
                             style={'textAlign': 'center', 'marginBottom': '20px', 'fontSize': '16px','width': '250px'}),
             ], style={'textAlign': 'center', 'marginBottom': 'auto', 'marginRight': 'auto',
                       'display': 'flex', 'flex-direction': 'column', 'justifyContent': 'space-evenly',
-                      'padding': '20px', 'align': '5','width': '400px'}),  # Added 'flex: 2' to make this division take up twice the space
+                      'padding': '20px', 'align': '5','width': '250px'}),  # Added 'flex: 2' to make this division take up twice the space
 
             html.Div(
                 dcc.Graph(
@@ -76,9 +76,18 @@ app.layout = html.Div(children=[
             dmc.Button('Delete Maze', id='delete_button', color='red', variant='filled',
                        style={'marginRight': '10px'}),
         ], style={'textAlign': 'center', 'marginBottom': '40px'}),
+        
+        # Footer
+        html.Footer([
+            html.P("Copyright © 2024"),
+            html.P("Author: Sujit Justine Barwa"),
+            html.P("Contact: Sujitjustine@gmail.com"),
+            html.A("Source Code on GitHub", href="https://github.com/SujitJustineBarwa/Hackathon-2024", target="_blank"),
+        ], style={'textAlign': 'center', 'marginTop': '40px'}),
 
     ], style={'maxWidth': '800px', 'margin': 'auto','display' : 'flex','flex-direction':'column'}),
 ])
+
 
 @app.callback(
     [Output('grid-graph', 'figure'),
