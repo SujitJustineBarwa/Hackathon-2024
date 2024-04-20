@@ -33,6 +33,7 @@ class matrix:
           self.root = temp_lattice_point
           
     self.set_neighbours()    
+    self.flood_fill_mode = "start_from_corner"
     self.flood_fill()
     
   def find_lattice(self,x,y):
@@ -58,7 +59,9 @@ class matrix:
       
   # BFS algorithm
   def flood_fill(self):
-          
+  
+    if config["GRID_SIZE_X"]%2 == 1 and config["GRID_SIZE_Y"]%2 == 1 and self.flood_fill_mode == "start_from_center":     # For odd size grid
+        
       q = [self.root]
       level = [0]
       visited = [self.root]
@@ -74,7 +77,54 @@ class matrix:
                   level.append(current_lattice.value+1)
                   q.append(child)
                   visited.append(child)
+                  
+    elif config["GRID_SIZE_X"]%2 == 0 and config["GRID_SIZE_Y"]%2 == 0 and self.flood_fill_mode == "start_from_center":     # For even size grid
+    
+      q = [
+           self.root,
+           self.find_lattice(self.root.x-1,self.root.y),
+           self.find_lattice(self.root.x-1,self.root.y-1),
+           self.find_lattice(self.root.x,self.root.y-1)
+          ]
            
+      level = [0,0,0,0]
+      visited = q.copy()
+      while q:
+          current_lattice = q[0]
+          current_lattice.value = level[0]
+          del level[0]
+          del q[0]
+          
+          for child in current_lattice.children.values():
+            if child:
+              if child not in visited:
+                  level.append(current_lattice.value+1)
+                  q.append(child)
+                  visited.append(child)
+                  
+    elif self.flood_fill_mode == "start_from_corner":
+        
+      q = [
+            self.find_lattice(0,0),
+            self.find_lattice(config["GRID_SIZE_X"]-1,0),
+            self.find_lattice(config["GRID_SIZE_X"]-1,config["GRID_SIZE_Y"]-1),
+            self.find_lattice(0,config["GRID_SIZE_Y"]-1),
+          ]
+      level = [0,0,0,0]
+      visited = q.copy()
+      while q:        
+        current_lattice = q[0]
+        current_lattice.value = level[0]
+        del level[0]
+        del q[0]
+        
+        for child in current_lattice.children.values():
+          if child:
+            if child not in visited:
+                level.append(current_lattice.value+1)
+                q.append(child)
+                visited.append(child)
+                  
       # Use this to check the lattice points value and there neighbour
       '''       
       for lattice in self.all_lattice_points:

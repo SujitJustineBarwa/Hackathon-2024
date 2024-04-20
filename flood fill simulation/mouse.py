@@ -32,15 +32,15 @@ class mouse(matrix):
                 self.pos_y = self.pos_y + 1
                 
         if direction == "Down":   
-            if self.pos_y - 1 > 0:
+            if self.pos_y - 1 >= 0:
                 self.pos_y = self.pos_y - 1
                 
         if direction == "Right":   
             if self.pos_x + 1 <= config['GRID_SIZE_X']-1:
                 self.pos_x = self.pos_x + 1
                 
-        if direction == "Left":   
-            if self.pos_x - 1 > 0:
+        if direction == "Left": 
+            if self.pos_x - 1 >= 0:
                 self.pos_x = self.pos_x - 1
         
     def sense(self,walls):
@@ -98,16 +98,33 @@ class mouse(matrix):
         # Update the matrix
         self.flood_fill()
         
-        # Move the mouse to the neighbour with the min lattice value
-        min_lattice_value = config["GRID_SIZE_X"] + config["GRID_SIZE_Y"]
-        min_direction = None
-        for direction,neighbour_lattice in lattice_point.children.items():
-            if neighbour_lattice:
-                if neighbour_lattice.value < min_lattice_value:
-                    min_lattice_value = neighbour_lattice.value
-                    min_direction = direction
-                    
-        self.move(min_direction)
+        if self.flood_fill_mode == "start_from_center":
+        
+            # Move the mouse to the neighbour with the min lattice value
+            min_lattice_value = config["GRID_SIZE_X"] + config["GRID_SIZE_Y"]
+            min_direction = None
+            for direction,neighbour_lattice in lattice_point.children.items():
+                if neighbour_lattice:
+                    if neighbour_lattice.value < min_lattice_value:
+                        min_lattice_value = neighbour_lattice.value
+                        min_direction = direction
+            
+            self.move(min_direction)
+        
+        elif self.flood_fill_mode == "start_from_corner":
+            
+            # Move the mouse to the neighbour with the max lattice value
+            max_lattice_value = 0     # Initialization
+            max_direction = None
+            for direction,neighbour_lattice in lattice_point.children.items():
+                if neighbour_lattice:
+                    if neighbour_lattice.value >  max_lattice_value:
+                        max_lattice_value = neighbour_lattice.value
+                        max_direction = direction
+                        
+            self.move(max_direction)
+        
+        print(max_direction)
         
     def reset_matrix(self):
         self.pos_x = 0
