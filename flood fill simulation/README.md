@@ -43,3 +43,6 @@ In this section, a python code is presented where a web app has been designed wh
     
 ## **Extended_Function.py**<br>
    - This function serves as a event manager function for the web app.<br>
+
+## **Mouse**<br> 
+   - Path tracking is capability added.<br>
