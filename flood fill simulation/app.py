@@ -249,6 +249,9 @@ def update_graph(clickData, regenerate_clicks, save_clicks, load_clicks, delete_
     # Displaying the matrix
     updated_fig.add_trace(moose.graph_matrix())
     
+    # Diplaying the path
+    updated_fig.add_trace(moose.track_path())
+    
     # Replotting the walls
     if wall_pattern.wall_list:
         for wall in wall_pattern.wall_list:

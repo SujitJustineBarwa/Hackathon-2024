@@ -12,6 +12,7 @@ class mouse(matrix):
         self.visited_walls = []
         self.pos_x = 0
         self.pos_y = 0
+        self.path = [self.find_lattice(0,0)]
         
     def plot(self):
     
@@ -98,36 +99,37 @@ class mouse(matrix):
         # Update the matrix
         self.flood_fill()
         
-        if self.flood_fill_mode == "start_from_center":
         
-            # Move the mouse to the neighbour with the min lattice value
-            min_lattice_value = config["GRID_SIZE_X"] + config["GRID_SIZE_Y"]
-            min_direction = None
-            for direction,neighbour_lattice in lattice_point.children.items():
-                if neighbour_lattice:
-                    if neighbour_lattice.value < min_lattice_value:
-                        min_lattice_value = neighbour_lattice.value
-                        min_direction = direction
+        # Move the mouse to the neighbour with the min lattice value
+        min_lattice_value = config["GRID_SIZE_X"] + config["GRID_SIZE_Y"]
+        min_direction = None
+        for direction,neighbour_lattice in lattice_point.children.items():
+            if neighbour_lattice:
+                if neighbour_lattice.value < min_lattice_value:
+                    min_lattice_value = neighbour_lattice.value
+                    min_direction = direction
+        
+        self.move(min_direction)
+        self.path.append(self.find_lattice(self.pos_x,self.pos_y))
+        
+    def track_path(self):
+    
+        path_x = []
+        path_y = []
+        for lattice_point in self.path:
+            path_x.append(lattice_point.x + 0.5)
+            path_y.append(lattice_point.y + 0.5)
             
-            self.move(min_direction)
-        
-        elif self.flood_fill_mode == "start_from_corner":
-            
-            # Move the mouse to the neighbour with the max lattice value
-            max_lattice_value = 0     # Initialization
-            max_direction = None
-            for direction,neighbour_lattice in lattice_point.children.items():
-                if neighbour_lattice:
-                    if neighbour_lattice.value >  max_lattice_value:
-                        max_lattice_value = neighbour_lattice.value
-                        max_direction = direction
-                        
-            self.move(max_direction)
-        
-        print(max_direction)
+        return go.Scatter(
+                            x = path_x,
+                            y = path_y,
+                            line_color = 'yellow',
+                            opacity=1
+                         )
         
     def reset_matrix(self):
         self.pos_x = 0
         self.pos_y = 0
         self.set_neighbours()    
         self.flood_fill()
+        self.path = []
