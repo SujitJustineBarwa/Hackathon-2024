@@ -3,5 +3,3 @@ https://www.youtube.com/watch?v=W7y9O0EZRaM
 
 How to analyze the cad in SimScape:
 https://www.youtube.com/watch?v=HpFGgzZL-FM
-
-https://www.st.com/en/development-tools/stm32cubemx.html
