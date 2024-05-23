@@ -1,5 +1,3 @@
-# Run in Blender scripts
-
 import bpy
 import re
 
@@ -83,3 +81,15 @@ for wall in walls:
     # Create the object and link it to the scene
     obj = bpy.data.objects.new(name=f"Wall_{start_coord}_{end_coord}", object_data=mesh)
     bpy.context.scene.collection.objects.link(obj)
+    
+    
+# Scaling all the grid
+scale_factor = 18.0
+
+# Iterate through all objects in the scene
+for obj in bpy.context.scene.objects:
+    # Scale the object
+    obj.scale *= scale_factor
+
+# Update the scene to reflect changes
+bpy.context.view_layer.update()
