@@ -1,1 +1,0 @@
-Set the path of the text to 3d maze.py
