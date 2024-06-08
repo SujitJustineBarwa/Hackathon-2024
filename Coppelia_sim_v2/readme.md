@@ -26,13 +26,18 @@ source /opt/ros/humble/setup.bash
    ```
    Note : my_package is my package's name.Also pip install coppeliasim_zmqremoteapi_client and pyzml for coppelia sim.
 
+11) Source the project in ros2_ws folder :
+   ```bash
+     source install/setup.bash
+   ```
+
 ## Start the simulation
-11) Load model Robot_Sim1.ttt in coppelia sim and start the topics by running :
+12) Load model Robot_Sim1.ttt in coppelia sim and start the topics by running :
     ```bash
       ros2 run my_package transmission
     ```
     
-12) Check the topic :
+13) Check the topic :
     ```bash
       ros2 topic list
     ```
