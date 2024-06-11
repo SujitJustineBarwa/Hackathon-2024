@@ -43,3 +43,7 @@ source /opt/ros/humble/setup.bash
     ```
 
 13) Run the Simulink model.
+
+# Updates and revisions
+1) The left wheel joint and right wheel joint's dynamics are set to velocity control rather then free.
+2) The file Visualization_with_python.py is introduced in the my_package folder inside the src of the ros2_ws.The Robot_Sim1.ttt is loaded in Coppelia Sim and this file can be independently run to visualize the left and right wheel speed,the TOF readings and Robot's Orientation.Note that this is not a part of ros build.It was made to verify the coppelia class used in data_hub, which transmits the data in ros.
