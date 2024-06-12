@@ -1,0 +1,72 @@
+# depslib dependency file v1.0
+1717661086 source:c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze\src\cell.cpp
+	"cell.h"
+
+1717661100 c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze\include\cell.h
+	<vector>
+
+1717661063 source:c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze\main.cpp
+	"maze.h"
+
+1717661129 c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze\include\maze.h
+	<vector>
+	<iostream>
+	<queue>
+	"cell.h"
+	"constants.h"
+
+1717608637 c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze\include\constants.h
+
+1717660302 source:c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze\src\maze.cpp
+	"maze.h"
+	<set>
+	<cmath>
+	"constants.h"
+
+1718160682 source:c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze_v3\main.cpp
+	"maze.h"
+	"localization.h"
+	<cmath>
+
+1718149069 c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze_v3\include\maze.h
+	<vector>
+	<iostream>
+	<queue>
+	"cell.h"
+	"Wall.h"
+	"constants.h"
+
+1717920602 c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze_v3\include\cell.h
+	<vector>
+
+1718149604 c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze_v3\include\constants.h
+
+1717916253 source:c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze_v3\src\cell.cpp
+	"cell.h"
+	"constants.h"
+	<bits/stdc++.h>
+
+1718160705 source:c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze_v3\src\maze.cpp
+	"maze.h"
+	"Wall.h"
+	<limits>
+	<set>
+	<cmath>
+	<list>
+
+1717914519 source:c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze_v3\src\wall.cpp
+	"wall.h"
+	"cell.h"
+	<iostream>
+	<cmath>
+
+1717913579 c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze_v3\include\wall.h
+	"cell.h"
+
+1718160612 source:c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze_v3\src\localization.cpp
+	"localization.h"
+	"constants.h"
+	<cmath>
+
+1718161321 c:\users\baw3kor\desktop\my_research\hackathon_2024\c_codes\map_of_the_maze_v3\include\localization.h
+
