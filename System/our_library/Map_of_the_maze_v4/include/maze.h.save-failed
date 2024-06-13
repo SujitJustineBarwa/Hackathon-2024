@@ -1,0 +1,26 @@
+#ifndef MAZE_H
+#define MAZE_H
+
+#include <vector>
+#include <iostream>
+#include <queue>
+#include "cell.h"
+#include "constants.h"
+
+class Maze {
+private:
+    std::vector<std::vector<cell*>> grid;
+
+public:
+    Maze();
+    ~Maze();
+    void display() const;
+    void floodFill(int startX, int startY, int newValue);
+
+private:
+    void createGrid();
+    void setNeighbors();
+    void cleanUp();
+};
+
+#endif // MAZE_H
